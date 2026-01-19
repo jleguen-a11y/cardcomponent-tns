@@ -1,0 +1,29 @@
+.card-demo-container {
+  padding: 40px;
+  background-color: #1E1E1E;
+  min-height: 100vh;
+}
+
+.card-demo-container h1 {
+  color: #E0E0E0;
+  margin-bottom: 32px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+}
+
+@media (max-width: 768px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .card-demo-container {
+    padding: 20px;
+  }
+}
