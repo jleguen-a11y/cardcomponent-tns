@@ -2,14 +2,174 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@layer base {
+  :root {
+    --angle: 0deg;
+  }
+  body {
+    @apply antialiased bg-neutral-950 text-neutral-100;
+  }
 }
 
-body {
-  font-family: 'Inter', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Animated gradient border for preview card */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: true;
+}
+
+.preview-card-border {
+  position: relative;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+  isolation: isolate;
+}
+
+/* Glass/Zoom Glow Effect - applied only when .with-glow is present */
+.preview-card-border.with-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  background: inherit;
+  border-radius: inherit;
+  filter: blur(20px);
+  opacity: 0.4;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+  will-change: filter, opacity;
+}
+
+.preview-card-border--loading {
+  background: 
+    conic-gradient(
+      from var(--angle) at 50% 50%,
+      transparent 0%,
+      transparent 70%,
+      #ec4899 75%,
+      #a855f7 85%,
+      #3b82f6 95%,
+      transparent 100%
+    ),
+    linear-gradient(#262626, #262626) !important;
+  
+  animation: gradient-rotate 3s linear infinite;
+}
+
+.preview-card-border--loading.with-glow {
+  box-shadow: 0 0 10px -2px rgba(59, 130, 246, 0.3);
+}
+
+.preview-card-border--loading.with-glow::before {
+  opacity: 0.7;
+  filter: blur(25px);
+  animation: glow-pulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes gradient-rotate {
+  to {
+    --angle: 360deg;
+  }
+}
+
+@keyframes glow-pulse {
+  0% {
+    filter: blur(20px);
+    opacity: 0.6;
+    transform: scale(0.98);
+  }
+  100% {
+    filter: blur(30px);
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+/* ===== Apple-style Star Animations ===== */
+
+/* WITH rotation */
+.star-main {
+  animation: star-breathe-rotate 3s ease-in-out infinite;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+.star-secondary {
+  animation: star-breathe-rotate-alt 3s ease-in-out infinite;
+  animation-delay: 1.5s;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+/* WITHOUT rotation (smooth scale + fade only) */
+.star-main-no-rotate {
+  animation: star-breathe 3s ease-in-out infinite;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+.star-secondary-no-rotate {
+  animation: star-breathe-alt 3s ease-in-out infinite;
+  animation-delay: 1.5s;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+/* Breathing WITH rotation - subtle */
+@keyframes star-breathe-rotate {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(0.75) rotate(-5deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(5deg);
+  }
+}
+
+@keyframes star-breathe-rotate-alt {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(0.7) rotate(5deg);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1) rotate(-5deg);
+  }
+}
+
+/* Breathing WITHOUT rotation - subtle, pure zoom */
+@keyframes star-breathe {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(0.75);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes star-breathe-alt {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+}
+
+/* ===== Text breathing - synced with stars (3s cycle) ===== */
+.text-breathe {
+  animation: text-breathe 3s ease-in-out infinite;
+  will-change: opacity;
+}
+
+@keyframes text-breathe {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
