@@ -1,0 +1,208 @@
+/**
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Loading Card — Animation Stylesheet
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * Self-contained CSS for the animated gradient border, glow, star breathing,
+ * and text breathing effects. Import this single file to get the full animation.
+ *
+ * Design tokens are documented in `lib/tokens.ts`.
+ * For Flutter port, see `ANIMATION-SPEC.md`.
+ *
+ * Sections:
+ *   1. CSS custom property registration (@property)
+ *   2. Gradient border (static + animated)
+ *   3. Glow effect (premium Apple HIG-inspired)
+ *   4. Star breathing animations (with/without rotation)
+ *   5. Text breathing animation
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+/* ╔═══════════════════════════════════════════════════════════════════════════╗
+   ║  1. CSS Custom Property — enables `conic-gradient` animation            ║
+   ╚═══════════════════════════════════════════════════════════════════════════╝ */
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: true;
+}
+
+/* ╔═══════════════════════════════════════════════════════════════════════════╗
+   ║  2. Gradient Border                                                      ║
+   ║  Flutter: SweepGradient + AnimationController (4.5s linear repeat)       ║
+   ╚═══════════════════════════════════════════════════════════════════════════╝ */
+
+.loading-card-border {
+  position: relative;
+  /* Static fallback — desaturated premium palette */
+  background: linear-gradient(135deg, #6B8AE6 0%, #8B7CF6 50%, #C084CF 100%);
+  isolation: isolate;
+}
+
+.loading-card-border--animated {
+  background:
+    conic-gradient(
+      from var(--angle) at 50% 50%,
+      transparent 0%,
+      transparent 70%,
+      #C084CF 75%,       /* Token: COLORS.mauve  */
+      #8B7CF6 85%,       /* Token: COLORS.violet */
+      #6B8AE6 95%,       /* Token: COLORS.blue   */
+      transparent 100%
+    ),
+    linear-gradient(#262626, #262626) !important; /* Token: COLORS.cardBg */
+  animation: loading-border-rotate 4.5s linear infinite; /* Token: TIMING.borderRotation */
+}
+
+@keyframes loading-border-rotate {
+  to {
+    --angle: 360deg;
+  }
+}
+
+/* ╔═══════════════════════════════════════════════════════════════════════════╗
+   ║  3. Glow Effect — Premium Apple HIG                                      ║
+   ║  "If the user consciously notices the glow, it's too strong."            ║
+   ║                                                                          ║
+   ║  Flutter: AnimatedContainer with BoxShadow + BackdropFilter              ║
+   ╚═══════════════════════════════════════════════════════════════════════════╝ */
+
+/* Outer halo — always present when .loading-card-glow is applied */
+.loading-card-border.loading-card-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  background: inherit;
+  border-radius: inherit;
+  filter: blur(14px);        /* Token: GLOW.blurResting */
+  opacity: 0.2;
+  transition: opacity 0.4s ease, filter 0.4s ease;
+  will-change: filter, opacity;
+}
+
+/* Elevated glow during animation */
+.loading-card-border--animated.loading-card-glow {
+  box-shadow: 0 0 10px -2px rgba(107, 138, 230, 0.15); /* Token: GLOW.boxShadowOpacity */
+}
+
+.loading-card-border--animated.loading-card-glow::before {
+  opacity: 0.3;
+  filter: blur(15px);
+  animation: loading-glow-pulse 3.5s ease-in-out infinite alternate; /* Token: TIMING.glowPulse */
+}
+
+@keyframes loading-glow-pulse {
+  0% {
+    filter: blur(12px);       /* Token: GLOW.blurRange[0] */
+    opacity: 0.2;             /* Token: GLOW.opacityRange[0] */
+    transform: scale(0.995);  /* Token: GLOW.scaleRange[0] */
+  }
+  100% {
+    filter: blur(18px);       /* Token: GLOW.blurRange[1] */
+    opacity: 0.35;            /* Token: GLOW.opacityRange[1] */
+    transform: scale(1.005);  /* Token: GLOW.scaleRange[1] */
+  }
+}
+
+/* ╔═══════════════════════════════════════════════════════════════════════════╗
+   ║  4. Star Breathing Animations                                            ║
+   ║                                                                          ║
+   ║  Flutter: AnimationController(duration: 4500ms) + Tween<double>          ║
+   ║  Main star offset: 0 — Secondary star offset: 2250ms (half cycle)       ║
+   ╚═══════════════════════════════════════════════════════════════════════════╝ */
+
+/* ── With rotation ───────────────────────────────────────────────────────── */
+
+.loading-star-main {
+  animation: loading-star-breathe-rotate 4.5s ease-in-out infinite;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+.loading-star-secondary {
+  animation: loading-star-breathe-rotate-alt 4.5s ease-in-out infinite;
+  animation-delay: 2.25s; /* Token: TIMING.secondaryOffset */
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+@keyframes loading-star-breathe-rotate {
+  0%, 100% {
+    opacity: 0.45;                             /* Token: STAR.mainOpacity[0] */
+    transform: scale(0.8) rotate(-3deg);       /* Token: STAR.mainScale[0], mainRotation[0] */
+  }
+  50% {
+    opacity: 1;                                /* Token: STAR.mainOpacity[1] */
+    transform: scale(1) rotate(3deg);          /* Token: STAR.mainScale[1], mainRotation[1] */
+  }
+}
+
+@keyframes loading-star-breathe-rotate-alt {
+  0%, 100% {
+    opacity: 0.35;                             /* Token: STAR.secondaryOpacity[0] */
+    transform: scale(0.75) rotate(3deg);       /* Token: STAR.secondaryScale[0], secondaryRotation[0] */
+  }
+  50% {
+    opacity: 0.85;                             /* Token: STAR.secondaryOpacity[1] */
+    transform: scale(1) rotate(-3deg);         /* Token: STAR.secondaryScale[1], secondaryRotation[1] */
+  }
+}
+
+/* ── Without rotation (scale + fade only) ────────────────────────────────── */
+
+.loading-star-main--no-rotate {
+  animation: loading-star-breathe 4.5s ease-in-out infinite;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+.loading-star-secondary--no-rotate {
+  animation: loading-star-breathe-alt 4.5s ease-in-out infinite;
+  animation-delay: 2.25s;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+@keyframes loading-star-breathe {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes loading-star-breathe-alt {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(0.75);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+}
+
+/* ╔═══════════════════════════════════════════════════════════════════════════╗
+   ║  5. Text Breathing                                                       ║
+   ║                                                                          ║
+   ║  Flutter: AnimatedOpacity with same 4.5s cycle                           ║
+   ╚═══════════════════════════════════════════════════════════════════════════╝ */
+
+.loading-text-breathe {
+  animation: loading-text-breathe 4.5s ease-in-out infinite;
+  will-change: opacity;
+}
+
+@keyframes loading-text-breathe {
+  0%, 100% {
+    opacity: 0.55; /* Token: TEXT.opacityRange[0] */
+  }
+  50% {
+    opacity: 1;    /* Token: TEXT.opacityRange[1] */
+  }
+}
